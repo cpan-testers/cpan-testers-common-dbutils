@@ -1,0 +1,32 @@
+--- #YAML:1.0
+name:                CPAN::Testers::Common::DBUtils
+version:             0.01
+abstract:            Basic Database Wrapper
+author:
+  - Barbie <barbie@cpan.org>
+
+license:             perl
+distribution_type:   module
+installdirs:         site
+
+requires:
+  Carp:                     0
+  Class::Accessor::Fast:    0
+  DBI:                      0
+recommends:
+  Test::More:               0.70
+  Test::Pod:                1.00
+  Test::Pod::Coverage:      0.08
+  Test::CPAN::Meta:         0.12
+build_requires:
+  Test::More:               0.70
+
+provides:
+  CPAN::Testers::Common::DBUtils:
+    file:     lib/CPAN/Testers/Common/DBUtils.pm
+    version:  0.01
+
+meta-spec:
+   version:   1.4
+   url:       http://module-build.sourceforge.net/META-spec-v1.4.html
+generated_by: Hand 1.0
