@@ -1,4 +1,8 @@
 Revision history for CPAN-Testers-Common-DBUtils
 
+0.02	15/12/2008
+	- added do_commit
+	- renamed some methods to split words
+
 0.01	14/12/2008
 	- First public release

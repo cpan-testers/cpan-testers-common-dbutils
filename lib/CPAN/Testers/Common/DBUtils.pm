@@ -4,7 +4,7 @@ use warnings;
 use strict;
 
 use vars qw($VERSION);
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 =head1 NAME
 
@@ -24,12 +24,14 @@ CPAN::Testers::Common::DBUtils - Basic Database Wrapper
                 dbfile  => '/var/www/mysite/db
                 errsub  => \&errors);
 
-  my @arr = $dbi->getquery('array',$sql);
-  my @arr = $dbi->getquery('array',$sql,$id);
-  my @arr = $dbi->getquery('hash', $sql,$id);
+  my @arr = $dbi->get_query('array',$sql);
+  my @arr = $dbi->get_query('array',$sql,$id);
+  my @arr = $dbi->get_query('hash', $sql,$id);
 
-  my $id = $dbi->idquery($sql,$id,$name);
-  $dbi->doquery($sql,$id);
+  my $id = $dbi->id_query($sql,$id,$name);
+  $dbi->do_query($sql,$id);
+
+  $dbi->do_commit();    # where AutoCommit is disabled
 
   # array iterator
   my $next = $dbi->iterator('array',$sql);
@@ -139,7 +141,7 @@ sub new {
 
 =over 4
 
-=item getquery(type,sql,<list>)
+=item get_query(type,sql,<list>)
 
   type - 'array' or 'hash'
   sql - SQL statement
@@ -151,7 +153,7 @@ specified by 'type'.
 
 =cut
 
-sub getquery {
+sub get_query {
     my ($dbv,$type,$sql,@args) = @_;
     return ()   unless($sql);
 
@@ -241,7 +243,7 @@ sub iterator {
     }
 }
 
-=item doquery(sql,<list>)
+=item do_query(sql,<list>)
 
   sql - SQL statement
   <list> - optional additional values to be inserted into SQL placeholders
@@ -250,9 +252,9 @@ This method is used to perform an SQL action statement.
 
 =cut
 
-sub doquery {
+sub do_query {
     my ($dbv,$sql,@args) = @_;
-    $dbv->_doquery($sql,0,@args);
+    $dbv->_do_query($sql,0,@args);
 }
 
 =item idquery(sql,<list>)
@@ -265,12 +267,12 @@ performing an INSERT statement, so that it returns the inserted record id.
 
 =cut
 
-sub idquery {
+sub id_query {
     my ($dbv,$sql,@args) = @_;
-    return $dbv->_doquery($sql,1,@args);
+    return $dbv->_do_query($sql,1,@args);
 }
 
-# _doquery(sql,idrequired,<list>)
+# _do_query(sql,idrequired,<list>)
 #
 #  sql - SQL statement
 #  idrequired - true if an ID value is required on return
@@ -279,7 +281,7 @@ sub idquery {
 # This method is used to perform an SQL action statement. Commonly used when
 # performing an INSERT statement, so that it returns the inserted record id.
 
-sub _doquery {
+sub _do_query {
     my ($dbv,$sql,$idrequired,@args) = @_;
     my $rowid = undef;
 
@@ -324,6 +326,17 @@ sub _doquery {
 
     ## Return the rowid we just used
     return $rowid;
+}
+
+=item do_commit()
+
+Performs a commit on the transaction where AutoCommit is disabled.
+
+=cut
+
+sub do_commit {
+    my $dbv  = shift;
+    $dbv->{dbh}->commit;
 }
 
 =item quote(string)
