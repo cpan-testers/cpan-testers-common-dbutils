@@ -257,7 +257,7 @@ sub do_query {
     $dbv->_do_query($sql,0,@args);
 }
 
-=item idquery(sql,<list>)
+=item id_query(sql,<list>)
 
   sql - SQL statement
   <list> - optional additional values to be inserted into SQL placeholders
