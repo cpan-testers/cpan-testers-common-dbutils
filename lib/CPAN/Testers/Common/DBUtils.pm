@@ -4,7 +4,7 @@ use warnings;
 use strict;
 
 use vars qw($VERSION);
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 =head1 NAME
 
@@ -336,7 +336,7 @@ Performs a commit on the transaction where AutoCommit is disabled.
 
 sub do_commit {
     my $dbv  = shift;
-    $dbv->{dbh}->commit;
+    $dbv->{dbh}->commit if($dbv->{dbh});
 }
 
 =item quote(string)
