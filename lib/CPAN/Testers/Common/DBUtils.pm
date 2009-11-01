@@ -4,7 +4,7 @@ use warnings;
 use strict;
 
 use vars qw($VERSION);
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 =head1 NAME
 
@@ -369,13 +369,23 @@ sub quote {
 
 The following accessor methods are available:
 
-  driver
-  database
-  dbfile
-  dbhost
-  dbport
-  dbuser
-  dbpass
+=over 4
+
+=item * driver
+
+=item * database
+
+=item * dbfile
+
+=item * dbhost
+
+=item * dbport
+
+=item * dbuser
+
+=item * dbpass
+
+=back
 
 All methods can be called to return the current value of the associated
 object variable. Note that these are only meant to be used as read-only
@@ -442,8 +452,8 @@ __END__
 
 =head1 SEE ALSO
 
-L<CPAN::WWW::Testers::Generator>
-L<CPAN::WWW::Testers>
+L<CPAN::WWW::Testers::Generator>,
+L<CPAN::WWW::Testers>,
 L<CPAN::Testers::WWW::Statistics>
 
 F<http://www.cpantesters.org/>,
@@ -457,7 +467,7 @@ Miss Barbell Productions, L<http://www.missbarbell.co.uk/>
 
 =head1 COPYRIGHT & LICENSE
 
-  Copyright (C) 2002-2008 Barbie for Miss Barbell Productions
+  Copyright (C) 2002-2009 Barbie for Miss Barbell Productions
   All Rights Reserved.
 
   This module is free software; you can redistribute it and/or

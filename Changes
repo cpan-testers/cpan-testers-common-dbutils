@@ -1,5 +1,10 @@
 Revision history for CPAN-Testers-Common-DBUtils
 
+0.04	01/11/2009
+	- bugfix for POD coverage.
+	- extended tests for META.yml file.
+	- added tests for Changes file.
+
 0.03	17/12/2008
 	- commit fix - don't try and commit non-connected dbs :(
 
