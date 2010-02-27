@@ -4,7 +4,7 @@ use warnings;
 use strict;
 
 use vars qw($VERSION);
-$VERSION = '0.04';
+$VERSION = '0.05';
 
 =head1 NAME
 
@@ -164,14 +164,16 @@ sub get_query {
     # prepare the sql statement for executing
     my $sth;
     eval { $sth = $dbv->{dbh}->prepare($sql) };
-    unless($sth) {
+    if($@ || !$sth) {
         $dbv->{errsub}->($dbv->{dbh}->errstr,$sql,@args);
         return ();
     }
 
     # execute the SQL using any values sent to the function
     # to be placed in the sql
-    if(!$sth->execute(@args)) {
+    my $res;
+    eval { $res = $sth->execute(@args); };
+    if($@ || !$res) {
         $dbv->{errsub}->($sth->errstr,$sql,@args);
         return ();
     }
@@ -216,15 +218,18 @@ sub iterator {
     $dbv = &_db_connect($dbv) if not $dbv->{dbh};
 
     # prepare the sql statement for executing
-    my $sth = $dbv->{dbh}->prepare($sql);
-    unless($sth) {
+    my $sth;
+    eval { $sth = $dbv->{dbh}->prepare($sql); };
+    if($@ || !$sth) {
         $dbv->{errsub}->($dbv->{dbh}->errstr,$sql,@args);
         return undef;
     }
 
     # execute the SQL using any values sent to the function
     # to be placed in the sql
-    if(!$sth->execute(@args)) {
+    my $res;
+    eval { $res = $sth->execute(@args); };
+    if($@ || !$res) {
         $dbv->{errsub}->($sth->errstr,$sql,@args);
         return undef;
     }
@@ -293,15 +298,18 @@ sub _do_query {
 
     if($idrequired) {
         # prepare the sql statement for executing
-        my $sth = $dbv->{dbh}->prepare($sql);
-        unless($sth) {
+        my $sth;
+        eval { $sth = $dbv->{dbh}->prepare($sql); };
+        if($@ || !$sth) {
             $dbv->{errsub}->($dbv->{dbh}->errstr,$sql,@args);
             return undef;
         }
 
         # execute the SQL using any values sent to the function
         # to be placed in the sql
-        if(!$sth->execute(@args)) {
+        my $res;
+        eval { $res = $sth->execute(@args); };
+        if($@ || !$res) {
             $dbv->{errsub}->($sth->errstr,$sql,@args);
             return undef;
         }

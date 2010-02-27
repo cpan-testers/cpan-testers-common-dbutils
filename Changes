@@ -1,5 +1,8 @@
 Revision history for CPAN-Testers-Common-DBUtils
 
+0.05	27/02/2010
+	- added better error detection on prepare and execute statements.
+
 0.04	01/11/2009
 	- bugfix for POD coverage.
 	- extended tests for META.yml file.
