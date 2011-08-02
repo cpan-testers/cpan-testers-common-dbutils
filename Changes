@@ -1,5 +1,9 @@
 Revision history for CPAN-Testers-Common-DBUtils
 
+0.06	01/08/2011
+	- added repeat query methods to send multiple common statements in a 
+	  single connection.
+
 0.05	27/02/2010
 	- added better error detection on prepare and execute statements.
 

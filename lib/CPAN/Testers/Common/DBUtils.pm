@@ -4,7 +4,7 @@ use warnings;
 use strict;
 
 use vars qw($VERSION);
-$VERSION = '0.05';
+$VERSION = '0.06';
 
 =head1 NAME
 
@@ -157,8 +157,8 @@ sub get_query {
     my ($dbv,$type,$sql,@args) = @_;
     return ()   unless($sql);
 
-    # if the object doesnt contain a reference to a dbh object
-    # then we need to connect to the database
+    # if the object doesn't contain a reference to a dbh
+    # object then we need to connect to the database
     $dbv = &_db_connect($dbv) if not $dbv->{dbh};
 
     # prepare the sql statement for executing
@@ -211,10 +211,10 @@ can be returned.
 
 sub iterator {
     my ($dbv,$type,$sql,@args) = @_;
-    return undef    unless($sql);
+    return  unless($sql);
 
-    # if the object doesnt contain a reference to a dbh object
-    # then we need to connect to the database
+    # if the object doesn't contain a reference to a dbh
+    # object then we need to connect to the database
     $dbv = &_db_connect($dbv) if not $dbv->{dbh};
 
     # prepare the sql statement for executing
@@ -222,7 +222,7 @@ sub iterator {
     eval { $sth = $dbv->{dbh}->prepare($sql); };
     if($@ || !$sth) {
         $dbv->{errsub}->($dbv->{dbh}->errstr,$sql,@args);
-        return undef;
+        return;
     }
 
     # execute the SQL using any values sent to the function
@@ -231,7 +231,7 @@ sub iterator {
     eval { $res = $sth->execute(@args); };
     if($@ || !$res) {
         $dbv->{errsub}->($sth->errstr,$sql,@args);
-        return undef;
+        return;
     }
 
     # grab the data in the right way
@@ -292,8 +292,8 @@ sub _do_query {
 
     return $rowid   unless($sql);
 
-    # if the object doesnt contain a refrence to a dbh object
-    # then we need to connect to the database
+    # if the object doesn't contain a reference to a dbh
+    # object then we need to connect to the database
     $dbv = &_db_connect($dbv) if not $dbv->{dbh};
 
     if($idrequired) {
@@ -302,7 +302,7 @@ sub _do_query {
         eval { $sth = $dbv->{dbh}->prepare($sql); };
         if($@ || !$sth) {
             $dbv->{errsub}->($dbv->{dbh}->errstr,$sql,@args);
-            return undef;
+            return;
         }
 
         # execute the SQL using any values sent to the function
@@ -311,11 +311,19 @@ sub _do_query {
         eval { $res = $sth->execute(@args); };
         if($@ || !$res) {
             $dbv->{errsub}->($sth->errstr,$sql,@args);
-            return undef;
+            return;
         }
 
         if($dbv->{driver} =~ /mysql/i) {
             $rowid = $dbv->{dbh}->{mysql_insertid};
+        } elsif($dbv->{driver} =~ /pg/i) {
+            my ($table) = $sql =~ /INTO\s+(\S+)/;
+            $rowid = $dbv->{dbh}->last_insert_id(undef,undef,$table,undef);
+        } elsif($dbv->{driver} =~ /sqlite/i) {
+            $dbv->{dbh}->prepare('SELECT last_insert_rowid()');
+            $res = $sth->execute();
+            my $row;
+            $rowid = $row->[0]  if( $row = $sth->fetchrow_arrayref() );
         } else {
             my $row;
             $rowid = $row->[0]  if( $row = $sth->fetchrow_arrayref() );
@@ -331,9 +339,87 @@ sub _do_query {
         $rowid = 1;     # technically this should be the number of succesful rows
     }
 
-
     ## Return the rowid we just used
     return $rowid;
+}
+
+=item repeat_query(sql,<list>)
+
+  sql - SQL statement
+  <list> - values to be inserted into SQL placeholders
+
+This method is used to store an SQL action statement, together associated
+arguments. Commonly used with statements where multiple arguments sets are
+applied to the same statement.
+
+=item repeat_queries()
+
+This method performs all store SQL action statements.
+
+=item repeater(sql,<list ref>)
+
+  sql - SQL statement
+  <list ref> - list of values to be inserted into SQL placeholders
+
+This method performs an single SQL action statement, using all the associated 
+arguments within the given list reference.
+
+=cut
+
+sub repeat_query {
+    my ($dbv,$sql,@args) = @_;
+    return  unless($sql);
+
+    # if the object doesn't contain a reference to a dbh
+    # object then we need to connect to the database
+    $dbv = &_db_connect($dbv) if not $dbv->{dbh};
+
+    push @{ $dbv->{repeat}{$sql} }, \@args;
+}
+
+sub repeat_queries {
+    my $dbv = shift;
+    return  unless($dbv && $dbv->{repeat});
+
+    for my $sql (keys %{ $dbv->{repeat} }) {
+        $dbv->repeater($sql,$dbv->{repeat}{$sql});
+    }
+
+    $dbv->{repeat} = undef;
+}
+
+sub repeater {
+    my ($dbv,$sql,$args) = @_;
+    my $rows = 0;
+
+    return $rows    unless($sql);
+
+    # if the object doesn't contain a reference to a dbh
+    # object then we need to connect to the database
+    $dbv = &_db_connect($dbv) if not $dbv->{dbh};
+
+    # prepare the sql statement for executing
+    my $sth;
+    eval { $sth = $dbv->{dbh}->prepare($sql); };
+    if($@ || !$sth) {
+        $dbv->{errsub}->($dbv->{dbh}->errstr,$sql,@{$args->[0]});
+        return $rows;
+    }
+
+    for my $arg (@$args) {
+        # execute the SQL using any values sent to the function
+        # to be placed in the sql
+        my $res;
+        eval { $res = $sth->execute(@$arg); };
+        if($@ || !$res) {
+            $dbv->{errsub}->($sth->errstr,$sql,@$args);
+            next;
+        }
+
+        $rows++;
+    }
+
+    return $rows;
 }
 
 =item do_commit()
@@ -358,7 +444,7 @@ according to the SQL rules.
 
 sub quote {
     my $dbv  = shift;
-    return undef    unless($_[0]);
+    return  unless($_[0]);
 
     # Cant quote with DBD::CSV
     return $_[0]    if($dbv->{driver} =~ /csv/i);
