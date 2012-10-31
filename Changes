@@ -2,6 +2,7 @@ Revision history for CPAN-Testers-Common-DBUtils
 
 	- spelling fixes. (thanks to Florian Schlichting & Gregor Herrmann).
         - change file dates changed to meet W3CDTF standards.
+        - added META.json & test script.
 
 0.06	2011-08-01
 	- added repeat query methods to send multiple common statements in a 
