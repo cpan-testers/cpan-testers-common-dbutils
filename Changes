@@ -1,25 +1,26 @@
 Revision history for CPAN-Testers-Common-DBUtils
 
 	- spelling fixes. (thanks to Florian Schlichting & Gregor Herrmann).
+        - change file dates changed to meet W3CDTF standards.
 
-0.06	01/08/2011
+0.06	2011-08-01
 	- added repeat query methods to send multiple common statements in a 
 	  single connection.
 
-0.05	27/02/2010
+0.05	2010-02-27
 	- added better error detection on prepare and execute statements.
 
-0.04	01/11/2009
+0.04	2009-11-01
 	- bugfix for POD coverage.
 	- extended tests for META.yml file.
 	- added tests for Changes file.
 
-0.03	17/12/2008
+0.03	2008-12-17
 	- commit fix - don't try and commit non-connected dbs :(
 
-0.02	15/12/2008
+0.02	2008-12-15
 	- added do_commit
 	- renamed some methods to split words
 
-0.01	14/12/2008
+0.01	2008-12-14
 	- First public release
