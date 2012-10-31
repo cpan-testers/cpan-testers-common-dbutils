@@ -14,8 +14,8 @@ plan 'no_plan';
 
 my $meta = meta_spec_ok(undef,undef,@_);
 
-use CPAN::Testers::Common::Article;
-my $version = $CPAN::Testers::Common::Article::VERSION;
+use CPAN::Testers::Common::DBUtils;
+my $version = $CPAN::Testers::Common::DBUtils::VERSION;
 
 is($meta->{version},$version,
     'META.yml distribution version matches');
