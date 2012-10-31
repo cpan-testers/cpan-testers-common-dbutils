@@ -1,19 +1,22 @@
 #!/usr/bin/perl -w
 use strict;
 
-use Test::More  tests => 19;
+use Test::More;#  tests => 19;
 use CPAN::Testers::Common::DBUtils;
 use Data::Dumper;
 
 eval "use Test::Database";
+diag($@)    if($@);
 plan skip_all => "Test::Database required for DB testing" if($@);
 
-#plan 'no_plan';
+plan 'no_plan';
 
 #my @handles = Test::Database->handles();
 #diag("handle: ".$_->dbd)    for(@handles);
 #diag("drivers all: ".$_)    for(Test::Database->list_drivers('all'));
 #diag("drivers ava: ".$_)    for(Test::Database->list_drivers('available'));
+
+#diag("rcfile=".Test::Database->_rcfile());
 
 # may expand DBs later
 my $td;
@@ -24,21 +27,21 @@ if($td = Test::Database->handle( 'mysql' )) {
 }
 
 SKIP: {
-    skip "No supported databases available", 17  unless($td);
+    skip "No supported databases available", 19  unless($td);
 
-#    diag(Dumper($td->connection_info()));
+#diag(Dumper($td->connection_info()));
 
     my %opts;
     ($opts{dsn}, $opts{dbuser}, $opts{dbpass}) =  $td->connection_info();
     ($opts{driver})    = $opts{dsn} =~ /dbi:([^;:]+)/;
     ($opts{database})  = $opts{dsn} =~ /database=([^;]+)/;
-    ($opts{database})  = $opts{dsn} =~ /dbname=([^;]+)/;
+    ($opts{database})  = $opts{dsn} =~ /dbname=([^;]+)/     unless($opts{database});
     ($opts{dbhost})    = $opts{dsn} =~ /host=([^;]+)/;
     ($opts{dbport})    = $opts{dsn} =~ /port=([^;]+)/;
     my %options = map {my $v = $opts{$_}; defined($v) ? ($_ => $v) : () }
                         qw(driver database dbfile dbhost dbport dbuser dbpass);
 
-    #diag(Dumper(\%opts));
+#diag(Dumper(\%options));
 
     # create new instance from Test::Database object
     my $ct = CPAN::Testers::Common::DBUtils->new(%options);
@@ -100,13 +103,13 @@ SKIP: {
 
         $sql = 'INSERT INTO cpanstats ( guid, state, postdate, tester, dist, version, platform, perl, osname, osvers, fulldate, type) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )';
         my $id = $ct->id_query( $sql,'2967432-ed372d00-b19f-3f77-b713-d32bba55d77f','fail','201102','andreas.koenig.gmwojprw@franz.ak.mind.de','Acme-CPANAuthors-French','0.07','x86_64-linux','5.10.0','linux','2.6.24-1-amd64','201102011038',2);
-diag("id=$id");
+#diag("id=$id");
         ok($id,'.. got back an id');
         @arr = $ct->get_query('hash','SELECT guid FROM cpanstats WHERE id=?',$id);
         is($arr[0]->{guid}, '2967432-ed372d00-b19f-3f77-b713-d32bba55d77f', '.. added record');
         @arr = $ct->get_query('array','SELECT count(*) FROM cpanstats');
         is($arr[0]->[0], 12, '.. inserted all records');
-diag(Dumper(\@arr));
+#diag(Dumper(\@arr));
     }
 
 
@@ -121,7 +124,6 @@ sub create_sqlite_databases {
             'PRAGMA auto_vacuum = 1',
             'CREATE TABLE cpanstats (
                 id          INTEGER PRIMARY KEY,
-                type        INTEGER,
                 guid        TEXT,
                 state       TEXT,
                 postdate    TEXT,
@@ -132,7 +134,8 @@ sub create_sqlite_databases {
                 perl        TEXT,
                 osname      TEXT,
                 osvers      TEXT,
-                fulldate    TEXT)',
+                fulldate    TEXT,
+                type        INTEGER)',
 
             'CREATE INDEX distverstate ON cpanstats (dist, version, state)',
             'CREATE INDEX ixguid ON cpanstats (guid)',
@@ -149,20 +152,22 @@ sub create_mysql_databases {
     my $db = shift;
 
     my @create_cpanstats = (
-            'CREATE TABLE cpanstats (
-                 id         int(10) unsigned NOT NULL,
-                 state      varchar(32),
-                 postdate   varchar(8),
-                 tester     varchar(255),
-                 dist       varchar(255),
-                 version    varchar(255),
-                 platform   varchar(255),
-                 perl       varchar(255),
-                 osname     varchar(255),
-                 osvers     varchar(255),
-                 fulldate   varchar(32),
-                 PRIMARY KEY (id)
-            )',
+            q{CREATE TABLE `cpanstats` (
+                `id`        int(10) unsigned NOT NULL AUTO_INCREMENT,
+                `guid`      varchar(64)     NOT NULL DEFAULT '',
+                `state`     varchar(32)     DEFAULT NULL,
+                `postdate`  varchar(8)      DEFAULT NULL,
+                `tester`    varchar(255)    DEFAULT NULL,
+                `dist`      varchar(255)    DEFAULT NULL,
+                `version`   varchar(255)    DEFAULT NULL,
+                `platform`  varchar(255)    DEFAULT NULL,
+                `perl`      varchar(255)    DEFAULT NULL,
+                `osname`    varchar(255)    DEFAULT NULL,
+                `osvers`    varchar(255)    DEFAULT NULL,
+                `fulldate`  varchar(32)     DEFAULT NULL,
+                `type`      int(2)          DEFAULT '0',
+                PRIMARY KEY (`id`)
+            )},
 
             'CREATE INDEX distverstate ON cpanstats (dist, version, state)',
             'CREATE INDEX ixguid ON cpanstats (guid)',
