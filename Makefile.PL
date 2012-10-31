@@ -1,18 +1,27 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use 5.006;
+
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-    'NAME'          => 'CPAN::Testers::Common::DBUtils',
-    'VERSION_FROM'  => 'lib/CPAN/Testers/Common/DBUtils.pm',
-    'PREREQ_PM'     => {
+    AUTHOR              => 'Barbie <barbie@cpan.org>',
+    NAME                => 'CPAN::Testers::Common::DBUtils',
+    VERSION_FROM        => 'lib/CPAN/Testers/Common/DBUtils.pm',
+    ABSTRACT            => 'Basic Database Wrapper used by CPAN Testers modules',
+    NO_META             => 1,
+    PREREQ_PM           => {
 
-        Carp                    => 0,
-        Class::Accessor::Fast   => 0,
-        DBI                     => 0,
-    },
+        # runtime prereqs
+        'Class::Accessor::Fast' => 0,
+        'Carp'                  => 0,
+        'DBI'                   => 0,
 
-    NO_META         => 1,
+        # build/test prereqs
+        'IO::File'              => '0',
+        'Test::More'            => '0.70',
 
-    ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
-      (ABSTRACT     => 'Basic Database Wrapper',
-       AUTHOR       => 'Barbie <barbie@cpan.org>') : ()),
+    }
 );

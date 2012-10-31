@@ -1,7 +1,7 @@
 {
     "name": "CPAN-Testers-Common-DBUtils",
     "version": "0.06",
-    "abstract": "Basic Database Wrapper",
+    "abstract": "Basic Database Wrapper used by CPAN Testers modules",
     "author": [
         "Barbie (BARBIE) <barbie@cpan.org>"
     ],
