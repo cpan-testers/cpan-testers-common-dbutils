@@ -546,8 +546,7 @@ __END__
 
 =head1 SEE ALSO
 
-L<CPAN::WWW::Testers::Generator>,
-L<CPAN::WWW::Testers>,
+L<CPAN::Testers::Data::Generator>,
 L<CPAN::Testers::WWW::Statistics>
 
 F<http://www.cpantesters.org/>,
@@ -561,10 +560,10 @@ Miss Barbell Productions, L<http://www.missbarbell.co.uk/>
 
 =head1 COPYRIGHT & LICENSE
 
-  Copyright (C) 2002-2009 Barbie for Miss Barbell Productions
+  Copyright (C) 2002-2012 Barbie for Miss Barbell Productions
   All Rights Reserved.
 
   This module is free software; you can redistribute it and/or
-  modify it under the same terms as Perl itself.
+  modify it under the Artistic Licence v2.
 
 =cut

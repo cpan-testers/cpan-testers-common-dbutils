@@ -3,6 +3,8 @@ Revision history for CPAN-Testers-Common-DBUtils
 	- spelling fixes. (thanks to Florian Schlichting & Gregor Herrmann).
         - change file dates changed to meet W3CDTF standards.
         - added META.json & test script.
+        - Artistic License v2 now sole license.
+        - added minimum perl version (5.006).
 
 0.06	2011-08-01
 	- added repeat query methods to send multiple common statements in a 
