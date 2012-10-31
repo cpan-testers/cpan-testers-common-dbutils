@@ -1,5 +1,7 @@
 Revision history for CPAN-Testers-Common-DBUtils
 
+	- spelling fixes. (thanks to Florian Schlichting & Gregor Herrmann).
+
 0.06	01/08/2011
 	- added repeat query methods to send multiple common statements in a 
 	  single connection.
