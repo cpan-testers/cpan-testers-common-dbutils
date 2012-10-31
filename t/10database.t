@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 
-use Test::More;#  tests => 19;
+use Test::More;#  tests => 21;
 use CPAN::Testers::Common::DBUtils;
 use Data::Dumper;
 
@@ -27,7 +27,7 @@ if($td = Test::Database->handle( 'mysql' )) {
 }
 
 SKIP: {
-    skip "No supported databases available", 19  unless($td);
+    skip "No supported databases available", 21  unless($td);
 
 #diag(Dumper($td->connection_info()));
 
@@ -79,6 +79,14 @@ SKIP: {
     }
     is($rows, 8, '.. iterated over all records');
 
+    $next = $ct->iterator('array','SELECT * FROM cpanstats');
+    $rows = 0;
+    while(my $row = $next->()) {
+        $rows++;
+        is($row->[12],2,'.. matched type');
+    }
+    is($rows, 8, '.. iterated over all records');
+
     # test repeat queries & repeater   
     $sql = 'INSERT INTO cpanstats ( id, guid, state, postdate, tester, dist, version, platform, perl, osname, osvers, fulldate, type) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
     $ct->repeat_query( $sql, 
@@ -90,11 +98,19 @@ SKIP: {
     $ct->repeat_query( $sql, 
         2970367,'2970367-ed372d00-b19f-3f77-b713-d32bba55d77f','pass','201102','CPAN.DCOLLINS@comcast.net','Abstract-Meta-Class','0.11','i686-linux-thread-multi','5.11.0 patch GitLive-blead-163-g28b1dae','linux','2.6.24-19-generic','201102010041',2
     );
+    $ct->repeat_query( $sql );
+    $ct->repeat_query();
     @arr = $ct->get_query('array','SELECT count(*) FROM cpanstats');
     is($arr[0]->[0], 8, '.. count all records before repeater');
     $ct->repeat_queries();
     @arr = $ct->get_query('array','SELECT count(*) FROM cpanstats');
     is($arr[0]->[0], 11, '.. count all records after repeater');
+    $ct->repeat_queries();
+    @arr = $ct->get_query('array','SELECT count(*) FROM cpanstats');
+    is($arr[0]->[0], 11, '.. count all records after repeater');
+
+    my $rowid = $ct->do_query();
+    is($rowid, undef, '.. blank sql - no row id');
 
 
     # insert using auto increment
@@ -112,6 +128,9 @@ SKIP: {
 #diag(Dumper(\@arr));
     }
 
+    # test quote
+    my $text = "Don't 'Quote' Me";
+    is($ct->quote($text), q{'Don\'t \'Quote\' Me'}, '.. quoted');
 
     # clean up
     $td->{driver}->drop_database($td->name);
