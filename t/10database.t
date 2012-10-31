@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 
-use Test::More  tests => 14;
+use Test::More  tests => 19;
 use CPAN::Testers::Common::DBUtils;
 use Data::Dumper;
 
@@ -10,17 +10,21 @@ plan skip_all => "Test::Database required for DB testing" if($@);
 
 #plan 'no_plan';
 
+#my @handles = Test::Database->handles();
+#diag("handle: ".$_->dbd)    for(@handles);
+#diag("drivers all: ".$_)    for(Test::Database->list_drivers('all'));
+#diag("drivers ava: ".$_)    for(Test::Database->list_drivers('available'));
+
 # may expand DBs later
 my $td;
-
-if($td = Test::Database->handle( 'SQLite' )) {
-    create_sqlite_databases($td);
-} elsif($td = Test::Database->handle( 'MySQL' )) {
+if($td = Test::Database->handle( 'mysql' )) {
     create_mysql_databases($td);
+} elsif($td = Test::Database->handle( 'SQLite' )) {
+    create_sqlite_databases($td);
 }
 
 SKIP: {
-    skip "No supported databases available", 1  unless($td);
+    skip "No supported databases available", 17  unless($td);
 
 #    diag(Dumper($td->connection_info()));
 
@@ -41,7 +45,7 @@ SKIP: {
     isa_ok($ct,'CPAN::Testers::Common::DBUtils');
 
     # test hash
-    is( $ct->driver, $td->dbd, 'driver matches' );
+    is( $ct->driver, $td->dbd, 'driver matches: ' . $ct->driver );
 
     # insert records
     my $sql = 'INSERT INTO cpanstats ( id, guid, state, postdate, tester, dist, version, platform, perl, osname, osvers, fulldate, type) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )';
@@ -72,8 +76,40 @@ SKIP: {
     }
     is($rows, 8, '.. iterated over all records');
 
-    # TODO: test repeat queries & repeater
-    
+    # test repeat queries & repeater   
+    $sql = 'INSERT INTO cpanstats ( id, guid, state, postdate, tester, dist, version, platform, perl, osname, osvers, fulldate, type) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    $ct->repeat_query( $sql, 
+        2969661,'2969661-ed372d00-b19f-3f77-b713-d32bba55d77f','pass','201102','CPAN.DCOLLINS@comcast.net','Abstract-Meta-Class','0.11','i686-linux-thread-multi','5.10.0','linux','2.6.24-19-generic','201102010303',2
+    );
+    $ct->repeat_query( $sql, 
+        2969663,'2969663-ed372d00-b19f-3f77-b713-d32bba55d77f','pass','201102','CPAN.DCOLLINS@comcast.net','Abstract-Meta-Class','0.11','i686-linux-thread-multi','5.10.0','linux','2.6.24-19-generic','201102010303',2
+    );
+    $ct->repeat_query( $sql, 
+        2970367,'2970367-ed372d00-b19f-3f77-b713-d32bba55d77f','pass','201102','CPAN.DCOLLINS@comcast.net','Abstract-Meta-Class','0.11','i686-linux-thread-multi','5.11.0 patch GitLive-blead-163-g28b1dae','linux','2.6.24-19-generic','201102010041',2
+    );
+    @arr = $ct->get_query('array','SELECT count(*) FROM cpanstats');
+    is($arr[0]->[0], 8, '.. count all records before repeater');
+    $ct->repeat_queries();
+    @arr = $ct->get_query('array','SELECT count(*) FROM cpanstats');
+    is($arr[0]->[0], 11, '.. count all records after repeater');
+
+
+    # insert using auto increment
+    SKIP: {
+        skip "skipping MySQL tests", 3  unless($opts{driver} eq 'mysql');
+
+        $sql = 'INSERT INTO cpanstats ( guid, state, postdate, tester, dist, version, platform, perl, osname, osvers, fulldate, type) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )';
+        my $id = $ct->id_query( $sql,'2967432-ed372d00-b19f-3f77-b713-d32bba55d77f','fail','201102','andreas.koenig.gmwojprw@franz.ak.mind.de','Acme-CPANAuthors-French','0.07','x86_64-linux','5.10.0','linux','2.6.24-1-amd64','201102011038',2);
+diag("id=$id");
+        ok($id,'.. got back an id');
+        @arr = $ct->get_query('hash','SELECT guid FROM cpanstats WHERE id=?',$id);
+        is($arr[0]->{guid}, '2967432-ed372d00-b19f-3f77-b713-d32bba55d77f', '.. added record');
+        @arr = $ct->get_query('array','SELECT count(*) FROM cpanstats');
+        is($arr[0]->[0], 12, '.. inserted all records');
+diag(Dumper(\@arr));
+    }
+
+
     # clean up
     $td->{driver}->drop_database($td->name);
 }
