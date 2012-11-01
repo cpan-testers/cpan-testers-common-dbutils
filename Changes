@@ -1,5 +1,6 @@
 Revision history for CPAN-Testers-Common-DBUtils
 
+0.07    2012-11-01
         - spelling fixes. (thanks to Florian Schlichting & Gregor Herrmann).
         - change file dates changed to meet W3CDTF standards.
         - added META.json & test script.
@@ -8,6 +9,7 @@ Revision history for CPAN-Testers-Common-DBUtils
         - reworked Makefile.PL for clarity.
         - updated test scripts.
         - added tests using Test::Database.
+        - added explicit LICENSE file.
 
 0.06    2011-08-01
         - added repeat query methods to send multiple common statements in a 
