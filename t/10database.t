@@ -6,7 +6,6 @@ use CPAN::Testers::Common::DBUtils;
 use Data::Dumper;
 
 eval "use Test::Database";
-diag($@)    if($@);
 plan skip_all => "Test::Database required for DB testing" if($@);
 
 plan 'no_plan';
@@ -130,7 +129,7 @@ SKIP: {
 
     # test quote
     my $text = "Don't 'Quote' Me";
-    is($ct->quote($text), q{'Don\'t \'Quote\' Me'}, '.. quoted');
+    like($ct->quote($text), qr{'Don(\\'|'')t (\\'|'')Quote(\\'|'') Me'}, '.. quoted');
 
     # clean up
     $td->{driver}->drop_database($td->name);
