@@ -4,7 +4,7 @@ use warnings;
 use strict;
 
 use vars qw($VERSION);
-$VERSION = '0.07';
+$VERSION = '0.08';
 
 =head1 NAME
 
@@ -320,7 +320,7 @@ sub _do_query {
             my ($table) = $sql =~ /INTO\s+(\S+)/;
             $rowid = $dbv->{dbh}->last_insert_id(undef,undef,$table,undef);
         } elsif($dbv->{driver} =~ /sqlite/i) {
-            $dbv->{dbh}->prepare('SELECT last_insert_rowid()');
+            $sth = $dbv->{dbh}->prepare('SELECT last_insert_rowid()');
             $res = $sth->execute();
             my $row;
             $rowid = $row->[0]  if( $row = $sth->fetchrow_arrayref() );

@@ -139,28 +139,28 @@ sub create_sqlite_databases {
     my $db = shift;
 
     my @create_cpanstats = (
-            'PRAGMA auto_vacuum = 1',
-            'CREATE TABLE cpanstats (
-                id          INTEGER PRIMARY KEY,
-                guid        TEXT,
-                state       TEXT,
-                postdate    TEXT,
-                tester      TEXT,
-                dist        TEXT,
-                version     TEXT,
-                platform    TEXT,
-                perl        TEXT,
-                osname      TEXT,
-                osvers      TEXT,
-                fulldate    TEXT,
-                type        INTEGER)',
+        'PRAGMA auto_vacuum = 1',
+        'DROP TABLE IF EXISTS cpanstats',
+        'CREATE TABLE cpanstats (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            guid        TEXT,
+            state       TEXT,
+            postdate    TEXT,
+            tester      TEXT,
+            dist        TEXT,
+            version     TEXT,
+            platform    TEXT,
+            perl        TEXT,
+            osname      TEXT,
+            osvers      TEXT,
+            fulldate    TEXT,
+            type        INTEGER)',
 
-            'CREATE INDEX distverstate ON cpanstats (dist, version, state)',
-            'CREATE INDEX ixguid ON cpanstats (guid)',
-            'CREATE INDEX ixperl ON cpanstats (perl)',
-            'CREATE INDEX ixplat ON cpanstats (platform)',
-            'CREATE INDEX ixdate ON cpanstats (postdate)',
-
+        'CREATE INDEX distverstate ON cpanstats (dist, version, state)',
+        'CREATE INDEX ixguid ON cpanstats (guid)',
+        'CREATE INDEX ixperl ON cpanstats (perl)',
+        'CREATE INDEX ixplat ON cpanstats (platform)',
+        'CREATE INDEX ixdate ON cpanstats (postdate)',
     );
 
     dosql($db,\@create_cpanstats);
@@ -170,29 +170,29 @@ sub create_mysql_databases {
     my $db = shift;
 
     my @create_cpanstats = (
-            q{CREATE TABLE `cpanstats` (
-                `id`        int(10) unsigned NOT NULL AUTO_INCREMENT,
-                `guid`      varchar(64)     NOT NULL DEFAULT '',
-                `state`     varchar(32)     DEFAULT NULL,
-                `postdate`  varchar(8)      DEFAULT NULL,
-                `tester`    varchar(255)    DEFAULT NULL,
-                `dist`      varchar(255)    DEFAULT NULL,
-                `version`   varchar(255)    DEFAULT NULL,
-                `platform`  varchar(255)    DEFAULT NULL,
-                `perl`      varchar(255)    DEFAULT NULL,
-                `osname`    varchar(255)    DEFAULT NULL,
-                `osvers`    varchar(255)    DEFAULT NULL,
-                `fulldate`  varchar(32)     DEFAULT NULL,
-                `type`      int(2)          DEFAULT '0',
-                PRIMARY KEY (`id`)
-            )},
+        'DROP TABLE IF EXISTS cpanstats',
+        q{CREATE TABLE `cpanstats` (
+            `id`        int(10) unsigned NOT NULL AUTO_INCREMENT,
+            `guid`      varchar(64)     NOT NULL DEFAULT '',
+            `state`     varchar(32)     DEFAULT NULL,
+            `postdate`  varchar(8)      DEFAULT NULL,
+            `tester`    varchar(255)    DEFAULT NULL,
+            `dist`      varchar(255)    DEFAULT NULL,
+            `version`   varchar(255)    DEFAULT NULL,
+            `platform`  varchar(255)    DEFAULT NULL,
+            `perl`      varchar(255)    DEFAULT NULL,
+            `osname`    varchar(255)    DEFAULT NULL,
+            `osvers`    varchar(255)    DEFAULT NULL,
+            `fulldate`  varchar(32)     DEFAULT NULL,
+            `type`      int(2)          DEFAULT '0',
+            PRIMARY KEY (`id`)
+        )},
 
-            'CREATE INDEX distverstate ON cpanstats (dist, version, state)',
-            'CREATE INDEX ixguid ON cpanstats (guid)',
-            'CREATE INDEX ixperl ON cpanstats (perl)',
-            'CREATE INDEX ixplat ON cpanstats (platform)',
-            'CREATE INDEX ixdate ON cpanstats (postdate)',
-
+        'CREATE INDEX distverstate ON cpanstats (dist, version, state)',
+        'CREATE INDEX ixguid ON cpanstats (guid)',
+        'CREATE INDEX ixperl ON cpanstats (perl)',
+        'CREATE INDEX ixplat ON cpanstats (platform)',
+        'CREATE INDEX ixdate ON cpanstats (postdate)',
     );
 
     dosql($db,\@create_cpanstats);
