@@ -12,16 +12,20 @@ plan 'no_plan';
 
 #my @handles = Test::Database->handles();
 #diag("handle: ".$_->dbd)    for(@handles);
-#diag("drivers all: ".$_)    for(Test::Database->list_drivers('all'));
-#diag("drivers ava: ".$_)    for(Test::Database->list_drivers('available'));
+
+diag("drivers all: ("
+    . join(' ', Test::Database->list_drivers('all'))        . "), available: (" 
+    . join(' ', Test::Database->list_drivers('available'))  . ")"   );
 
 #diag("rcfile=".Test::Database->_rcfile());
 
+my %drivers = map {$_ => 1} Test::Database->list_drivers('available');
+
 # may expand DBs later
 my $td;
-if($td = Test::Database->handle( 'mysql' )) {
+if($drivers{'mysql'} && ($td = Test::Database->handle( 'mysql' ))) {
     create_mysql_databases($td);
-} elsif($td = Test::Database->handle( 'SQLite' )) {
+} elsif($drivers{'SQLite'} && ($td = Test::Database->handle( 'SQLite' ))) {
     create_sqlite_databases($td);
 }
 
