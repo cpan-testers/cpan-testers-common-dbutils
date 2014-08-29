@@ -159,7 +159,7 @@ sub get_query {
 
     # if the object doesn't contain a reference to a dbh
     # object then we need to connect to the database
-    $dbv = &_db_connect($dbv) if not $dbv->{dbh};
+    $dbv = _db_connect($dbv) if not $dbv->{dbh};
 
     # prepare the sql statement for executing
     my $sth;
@@ -215,7 +215,7 @@ sub iterator {
 
     # if the object doesn't contain a reference to a dbh
     # object then we need to connect to the database
-    $dbv = &_db_connect($dbv) if not $dbv->{dbh};
+    $dbv = _db_connect($dbv) if not $dbv->{dbh};
 
     # prepare the sql statement for executing
     my $sth;
@@ -294,7 +294,7 @@ sub _do_query {
 
     # if the object doesn't contain a reference to a dbh
     # object then we need to connect to the database
-    $dbv = &_db_connect($dbv) if not $dbv->{dbh};
+    $dbv = _db_connect($dbv) if not $dbv->{dbh};
 
     if($idrequired) {
         # prepare the sql statement for executing
@@ -372,7 +372,7 @@ sub repeat_query {
 
     # if the object doesn't contain a reference to a dbh
     # object then we need to connect to the database
-    $dbv = &_db_connect($dbv) if not $dbv->{dbh};
+    $dbv = _db_connect($dbv) if not $dbv->{dbh};
 
     push @{ $dbv->{repeat}{$sql} }, \@args;
 }
@@ -396,7 +396,7 @@ sub repeater {
 
     # if the object doesn't contain a reference to a dbh
     # object then we need to connect to the database
-    $dbv = &_db_connect($dbv) if not $dbv->{dbh};
+    $dbv = _db_connect($dbv) if not $dbv->{dbh};
 
     # prepare the sql statement for executing
     my $sth;
@@ -451,7 +451,7 @@ sub quote {
 
     # if the object doesnt contain a reference to a dbh object
     # then we need to connect to the database
-    $dbv = &_db_connect($dbv) if not $dbv->{dbh};
+    $dbv = _db_connect($dbv) if not $dbv->{dbh};
 
     $dbv->{dbh}->quote($_[0]);
 }
