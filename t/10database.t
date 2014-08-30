@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 
-use Test::More;#  tests => 21;
+use Test::More;#  tests => 26;
 use CPAN::Testers::Common::DBUtils;
 use Data::Dumper;
 
@@ -36,7 +36,7 @@ for my $driver (qw(mysql SQLite)) {
 }
 
 SKIP: {
-    skip "No supported databases available", 21  unless($td);
+    skip "No supported databases available", 26  unless($td);
 
 #diag(Dumper($td->connection_info()));
 
@@ -71,7 +71,8 @@ SKIP: {
     $ct->do_query( $sql,2959417,'2959417-ed372d00-b19f-3f77-b713-d32bba55d77f','pass','201101','rhaen@cpan.org (Ulrich Habel)','Abstract-Meta-Class','0.11','MSWin32-x86-multi-thread','5.10.0','MSWin32','5.1','201101301529',2);
 
     # select records
-    my @arr = $ct->get_query('array','SELECT count(*) FROM cpanstats');
+    my $count = 'SELECT count(*) FROM cpanstats';
+    my @arr = $ct->get_query('array',$count);
     is($arr[0]->[0], 8, '.. count all records');
     @arr = $ct->get_query('hash','SELECT count(*) AS count FROM cpanstats WHERE state=?','pass');
     is($arr[0]->{count}, 2, '.. count PASS records');
@@ -109,13 +110,13 @@ SKIP: {
     );
     $ct->repeat_query( $sql );
     $ct->repeat_query();
-    @arr = $ct->get_query('array','SELECT count(*) FROM cpanstats');
+    @arr = $ct->get_query('array',$count);
     is($arr[0]->[0], 8, '.. count all records before repeater');
     $ct->repeat_queries();
-    @arr = $ct->get_query('array','SELECT count(*) FROM cpanstats');
+    @arr = $ct->get_query('array',$count);
     is($arr[0]->[0], 11, '.. count all records after repeater');
     $ct->repeat_queries();
-    @arr = $ct->get_query('array','SELECT count(*) FROM cpanstats');
+    @arr = $ct->get_query('array',$count);
     is($arr[0]->[0], 11, '.. count all records after repeater');
 
     my $rowid = $ct->do_query();
@@ -132,7 +133,7 @@ SKIP: {
         ok($id,'.. got back an id');
         @arr = $ct->get_query('hash','SELECT guid FROM cpanstats WHERE id=?',$id);
         is($arr[0]->{guid}, '2967432-ed372d00-b19f-3f77-b713-d32bba55d77f', '.. added record');
-        @arr = $ct->get_query('array','SELECT count(*) FROM cpanstats');
+        @arr = $ct->get_query('array',$count);
         is($arr[0]->[0], 12, '.. inserted all records');
 #diag(Dumper(\@arr));
     }
@@ -141,7 +142,31 @@ SKIP: {
     my $text = "Don't 'Quote' Me";
     like($ct->quote($text), qr{'Don(\\'|'')t (\\'|'')Quote(\\'|'') Me'}, '.. quoted');
 
+    $options{AutoCommit} = 0;
+    $ct = CPAN::Testers::Common::DBUtils->new(%options);
+    @arr = $ct->get_query('array',$count);
+    is($arr[0]->[0], 12, '.. inserted all records');
+
+    $sql = 'INSERT INTO cpanstats ( guid, state, postdate, tester, dist, version, platform, perl, osname, osvers, fulldate, type) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )';
+    my $id = $ct->id_query( $sql,'2967432-ed372d00-b19f-3f77-b713-d32bba55d88f','fail','201102','andreas.koenig.gmwojprw@franz.ak.mind.de','Acme-CPANAuthors-French','0.07','x86_64-linux','5.10.0','linux','2.6.24-1-amd64','201102011038',2);
+    @arr = $ct->get_query('array',$count);
+    is($arr[0]->[0], 13, '.. inserted all records');
+
+    $ct->do_rollback();
+    @arr = $ct->get_query('array',$count);
+    is($arr[0]->[0], 12, '.. inserted all records');
+
+    $sql = 'INSERT INTO cpanstats ( guid, state, postdate, tester, dist, version, platform, perl, osname, osvers, fulldate, type) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )';
+    $id = $ct->id_query( $sql,'2967432-ed372d00-b19f-3f77-b713-d32bba55d88f','fail','201102','andreas.koenig.gmwojprw@franz.ak.mind.de','Acme-CPANAuthors-French','0.07','x86_64-linux','5.10.0','linux','2.6.24-1-amd64','201102011038',2);
+    @arr = $ct->get_query('array',$count);
+    is($arr[0]->[0], 13, '.. inserted all records');
+
+    $ct->do_commit();
+    @arr = $ct->get_query('array',$count);
+    is($arr[0]->[0], 13, '.. inserted all records');
+
     # clean up
+    $ct->DESTROY();
     $td->{driver}->drop_database($td->name);
 }
 
