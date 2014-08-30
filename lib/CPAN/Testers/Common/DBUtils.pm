@@ -383,11 +383,13 @@ sub repeat_queries {
     my $dbv = shift;
     return  unless($dbv && $dbv->{repeat});
 
+    my $rows = 0;
     for my $sql (keys %{ $dbv->{repeat} }) {
-        $dbv->repeater($sql,$dbv->{repeat}{$sql});
+        $rows += $dbv->repeater($sql,$dbv->{repeat}{$sql});
     }
 
     $dbv->{repeat} = undef;
+    return $rows;
 }
 
 sub repeater {
