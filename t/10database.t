@@ -3,12 +3,12 @@ use strict;
 
 use CPAN::Testers::Common::DBUtils;
 use Data::Dumper;
-use Test::More;#  tests => 37;
+use Test::More;
 
 eval "use Test::Database";
 plan skip_all => "Test::Database required for DB testing" if($@);
 
-plan 'no_plan';
+plan tests => 50;
 
 #my @handles = Test::Database->handles();
 #diag("handle: ".$_->dbd)    for(@handles);
@@ -36,7 +36,7 @@ for my $driver (qw(mysql SQLite)) {
 }
 
 SKIP: {
-    skip "No supported databases available", 37  unless($td);
+    skip "No supported databases available", 50  unless($td);
 
 #diag(Dumper($td->connection_info()));
 
@@ -165,6 +165,7 @@ SKIP: {
     @arr = $ct->get_query('array',$count);
     is($arr[0]->[0], 13, '.. inserted all records');
 
+    # queries
     {
         my @empty = ();
         my @results = $ct->get_query('array','');
@@ -192,6 +193,22 @@ SKIP: {
         is($next,undef,'.. empty SQL to id_query');
         $next = $ct->id_query('SELECT VERSION()');
         is($next,0,'.. got a result with VERSION SQL');
+    }
+
+    # repeaters
+    {
+        my $insert = 'INSERT INTO cpanstats SET GUID=?';
+        $ct->repeat_query($insert,'ABC123');
+        $ct->repeat_query($insert,'MNO456');
+        $ct->repeat_query($insert,'XYZ789');
+
+        is(scalar(@{$ct->{repeat}{$insert}}),3);
+
+        is($ct->repeat_queries(),3,'.. repeated 3 rows');
+
+        $ct->do_commit();
+        @arr = $ct->get_query('array',$count);
+        is($arr[0]->[0], 16, '.. inserted all records');
     }
 
     # clean up
