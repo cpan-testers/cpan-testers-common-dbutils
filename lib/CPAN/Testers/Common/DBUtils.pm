@@ -31,6 +31,7 @@ CPAN::Testers::Common::DBUtils - Basic Database Wrapper
   my $id = $dbi->id_query($sql,$id,$name);
   $dbi->do_query($sql,$id);
 
+  $dbi->do_rollback();  # where AutoCommit is disabled
   $dbi->do_commit();    # where AutoCommit is disabled
 
   # array iterator
@@ -343,14 +344,15 @@ sub _do_query {
     return $rowid;
 }
 
-=item repeat_query(sql,<list>)
+=item repeat_query(sql,<list>,[(<arg1>), ... (<argN>)])
 
   sql - SQL statement
   <list> - values to be inserted into SQL placeholders
+  <argX> - arguments to be inserted into placeholders
 
-This method is used to store an SQL action statement, together associated
-arguments. Commonly used with statements where multiple arguments sets are
-applied to the same statement.
+This method is used to store an SQL action statement, together withe the 
+associated arguments. Commonly used with statements where multiple arguments 
+sets are applied to the same statement.
 
 =item repeat_queries()
 
