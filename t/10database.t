@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 use strict;
 
-use Test::More;#  tests => 26;
 use CPAN::Testers::Common::DBUtils;
 use Data::Dumper;
+use Test::More;#  tests => 37;
 
 eval "use Test::Database";
 plan skip_all => "Test::Database required for DB testing" if($@);
@@ -36,7 +36,7 @@ for my $driver (qw(mysql SQLite)) {
 }
 
 SKIP: {
-    skip "No supported databases available", 26  unless($td);
+    skip "No supported databases available", 37  unless($td);
 
 #diag(Dumper($td->connection_info()));
 
@@ -164,6 +164,35 @@ SKIP: {
     $ct->do_commit();
     @arr = $ct->get_query('array',$count);
     is($arr[0]->[0], 13, '.. inserted all records');
+
+    {
+        my @empty = ();
+        my @results = $ct->get_query('array','');
+        is_deeply(\@results,\@empty,'.. empty SQL to get_query');
+        @results = $ct->get_query('array','SELECT VERSION()');
+        is(scalar(@results),1,'.. got a result with VERSION SQL');
+        eval { @results = $ct->get_query('array','SELECT') };
+        like($@,qr/You have an error in your SQL syntax/,'.. bad SQL spotted');
+
+        my $next = $ct->iterator('array','');
+        is($next,undef,'.. empty SQL to iterator');
+        $next = $ct->iterator('array','SELECT VERSION()');
+        isnt($next,undef,'.. got a result with VERSION SQL');
+        eval { $next = $ct->iterator('array','SELECT') };
+        like($@,qr/You have an error in your SQL syntax/,'.. bad SQL spotted');
+
+        $next = $ct->do_query('');
+        is($next,undef,'.. empty SQL to do_query');
+        $next = $ct->do_query('SELECT VERSION()');
+        is($next,1,'.. got a result with VERSION SQL');
+        eval { $next = $ct->do_query('array','SELECT') };
+        like($@,qr/You have an error in your SQL syntax/,'.. bad SQL spotted');
+
+        $next = $ct->id_query('');
+        is($next,undef,'.. empty SQL to id_query');
+        $next = $ct->id_query('SELECT VERSION()');
+        is($next,0,'.. got a result with VERSION SQL');
+    }
 
     # clean up
     $ct->DESTROY();
