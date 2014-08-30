@@ -354,7 +354,7 @@ applied to the same statement.
 
 =item repeat_queries()
 
-This method performs all store SQL action statements.
+This method performs all stored SQL action statements.
 
 =item repeater(sql,<list ref>)
 
