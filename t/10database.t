@@ -8,7 +8,7 @@ use Test::More;
 eval "use Test::Database";
 plan skip_all => "Test::Database required for DB testing" if($@);
 
-plan tests => 50;
+plan tests => 49;
 
 #my @handles = Test::Database->handles();
 #diag("handle: ".$_->dbd)    for(@handles);
@@ -36,7 +36,7 @@ for my $driver (qw(mysql SQLite)) {
 }
 
 SKIP: {
-    skip "No supported databases available", 50  unless($td);
+    skip "No supported databases available", 49  unless($td);
 
 #diag(Dumper($td->connection_info()));
 
@@ -97,31 +97,28 @@ SKIP: {
     }
     is($rows, 8, '.. iterated over all records');
 
-    # test repeat queries & repeater   
-    $sql = 'INSERT INTO cpanstats ( id, guid, state, postdate, tester, dist, version, platform, perl, osname, osvers, fulldate, type) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    $ct->repeat_query( $sql, 
-        2969661,'2969661-ed372d00-b19f-3f77-b713-d32bba55d77f','pass','201102','CPAN.DCOLLINS@comcast.net','Abstract-Meta-Class','0.11','i686-linux-thread-multi','5.10.0','linux','2.6.24-19-generic','201102010303',2
-    );
-    $ct->repeat_query( $sql, 
-        2969663,'2969663-ed372d00-b19f-3f77-b713-d32bba55d77f','pass','201102','CPAN.DCOLLINS@comcast.net','Abstract-Meta-Class','0.11','i686-linux-thread-multi','5.10.0','linux','2.6.24-19-generic','201102010303',2
-    );
-    $ct->repeat_query( $sql, 
-        2970367,'2970367-ed372d00-b19f-3f77-b713-d32bba55d77f','pass','201102','CPAN.DCOLLINS@comcast.net','Abstract-Meta-Class','0.11','i686-linux-thread-multi','5.11.0 patch GitLive-blead-163-g28b1dae','linux','2.6.24-19-generic','201102010041',2
-    );
-    $ct->repeat_query( $sql );
-    $ct->repeat_query();
-    @arr = $ct->get_query('array',$count);
-    is($arr[0]->[0], 8, '.. count all records before repeater');
-    $ct->repeat_queries();
-    @arr = $ct->get_query('array',$count);
-    is($arr[0]->[0], 11, '.. count all records after repeater');
-    $ct->repeat_queries();
-    @arr = $ct->get_query('array',$count);
-    is($arr[0]->[0], 11, '.. count all records after repeater');
+    # repeaters
+    {
+        my $insert = 'INSERT INTO cpanstats SET GUID=?';
+        $ct->repeat_query($insert,'ABC123');
+        $ct->repeat_query($insert,'MNO456');
+        $ct->repeat_query($insert,'XYZ789');
+        $ct->repeat_query($insert); # no arguments, no store
+        $ct->repeat_query();        # no SQL, no store
 
-    my $rowid = $ct->do_query();
-    is($rowid, undef, '.. blank sql - no row id');
+        is(scalar(@{$ct->{repeat}{$insert}}),3);
 
+        @arr = $ct->get_query('array',$count);
+        is($arr[0]->[0], 8, '.. count all records before repeater');
+
+        is($ct->repeat_queries(),3,'.. repeated 3 rows');
+        @arr = $ct->get_query('array',$count);
+        is($arr[0]->[0], 11, '.. count all records after repeater');
+
+        is($ct->repeat_queries(),0,'.. repeated 0 rows');
+        @arr = $ct->get_query('array',$count);
+        is($arr[0]->[0], 11, '.. count all records after repeater');
+    }
 
     # insert using auto increment
     SKIP: {
@@ -165,7 +162,7 @@ SKIP: {
     @arr = $ct->get_query('array',$count);
     is($arr[0]->[0], 13, '.. inserted all records');
 
-    # queries
+    # test bad queries
     {
         my @empty = ();
         my @results = $ct->get_query('array','');
@@ -193,22 +190,6 @@ SKIP: {
         is($next,undef,'.. empty SQL to id_query');
         $next = $ct->id_query('SELECT VERSION()');
         is($next,0,'.. got a result with VERSION SQL');
-    }
-
-    # repeaters
-    {
-        my $insert = 'INSERT INTO cpanstats SET GUID=?';
-        $ct->repeat_query($insert,'ABC123');
-        $ct->repeat_query($insert,'MNO456');
-        $ct->repeat_query($insert,'XYZ789');
-
-        is(scalar(@{$ct->{repeat}{$insert}}),3);
-
-        is($ct->repeat_queries(),3,'.. repeated 3 rows');
-
-        $ct->do_commit();
-        @arr = $ct->get_query('array',$count);
-        is($arr[0]->[0], 16, '.. inserted all records');
     }
 
     # clean up
