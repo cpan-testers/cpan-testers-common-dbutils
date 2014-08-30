@@ -22,11 +22,17 @@ diag("drivers all: ("
 my %drivers = map {$_ => 1} Test::Database->list_drivers('available');
 
 # may expand DBs later
-my $td;
-if($drivers{'mysql'} && ($td = Test::Database->handle( 'mysql' ))) {
-    create_mysql_databases($td);
-} elsif($drivers{'SQLite'} && ($td = Test::Database->handle( 'SQLite' ))) {
-    create_sqlite_databases($td);
+my ($td,$handle,$dbh);
+for my $driver (qw(mysql SQLite)) {
+    next    unless($drivers{ $driver });
+    next    unless($handle = Test::Database->handle( $driver ));
+    eval { $dbh = $handle->dbh };   # check we can connect
+    next    unless($dbh);
+
+    $td = $handle;
+    create_mysql_databases($td)     if($driver eq 'mysql');
+    create_sqlite_databases($td)    if($driver eq 'SQLite');
+    last;
 }
 
 SKIP: {
