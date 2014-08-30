@@ -5,6 +5,7 @@ Revision history for CPAN-Testers-Common-DBUtils
         - added resources to META.yml.
         - extended test suite.
         - remove old style function calls.
+        - added rollback functionality.
 
 0.09    2014-01-24
         - if we don't have the driver for tests, don't try and load it!

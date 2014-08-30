@@ -433,6 +433,17 @@ sub do_commit {
     $dbv->{dbh}->commit if($dbv->{dbh});
 }
 
+=item do_rollback()
+
+Performs a rollback on the transaction where AutoCommit is disabled.
+
+=cut
+
+sub do_rollback {
+    my $dbv  = shift;
+    $dbv->{dbh}->rollback if($dbv->{dbh});
+}
+
 =item quote(string)
 
   string - string to be quoted
