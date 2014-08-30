@@ -8,6 +8,7 @@ Revision history for CPAN-Testers-Common-DBUtils
         - added rollback functionality.
         - updated documentation.
         - return number of rows entered when repeating.
+        - test MySQL and SQLite if they are available.
 
 0.09    2014-01-24
         - if we don't have the driver for tests, don't try and load it!
