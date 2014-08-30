@@ -381,7 +381,7 @@ sub repeat_query {
 
 sub repeat_queries {
     my $dbv = shift;
-    return  unless($dbv && $dbv->{repeat});
+    return 0    unless($dbv && $dbv->{repeat});
 
     my $rows = 0;
     for my $sql (keys %{ $dbv->{repeat} }) {
