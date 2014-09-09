@@ -1,6 +1,7 @@
 Revision history for CPAN-Testers-Common-DBUtils
 ================================================
 
+0.11    2014-09-09
         - fixed license fields in META.json to be lists.
 
 0.10    2014-09-08
